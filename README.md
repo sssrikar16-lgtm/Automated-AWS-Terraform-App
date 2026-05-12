@@ -10,6 +10,8 @@ This repository intentionally contains **only** that 2-tier stack. Terraform fil
 
 - [What this stack deploys](#what-this-stack-deploys)
 - [Architecture](#architecture)
+  - [Reference diagram](#reference-diagram)
+  - [Mermaid flow diagram](#mermaid-flow-diagram)
 - [Network layout](#network-layout)
 - [Repository layout](#repository-layout)
 - [Requirements](#requirements)
@@ -43,6 +45,18 @@ Default **AWS region** is **`ap-northeast-1`** (Tokyo). Default **Terraform** an
 ## Architecture
 
 High-level traffic flow: **clients → Internet → ALB (public subnets) → EC2 (public subnets)**. **RDS** runs only in **private** subnets; it does not receive a public endpoint from this template. Private subnets use the **NAT Gateway** for outbound connectivity (for example, patches), while public subnets use the **Internet Gateway** for the default route.
+
+The sections below show the same idea two ways: a **reference diagram** checked into this repo (`assets/aws-app-architecture.png`) and a **Mermaid** diagram you can edit inline in the README.
+
+### Reference diagram
+
+The following asset summarizes **Terraform as input** (`providers.tf`, `vpc.tf`, `ec2.tf`, `rds.tf`) and the **resulting AWS footprint** in **`ap-northeast-1`**: VPC **`10.0.0.0/16`**, Internet Gateway and NAT Gateway, **web tier** (ALB and Apache EC2 instances in public subnets), and **data tier** (RDS MySQL in private subnets).
+
+![Automated AWS 2-tier architecture with Terraform: IaC files provision ALB, Apache EC2, and RDS MySQL inside VPC 10.0.0.0/16 in ap-northeast-1](assets/aws-app-architecture.png)
+
+*Repository file:* [`assets/aws-app-architecture.png`](assets/aws-app-architecture.png)
+
+### Mermaid flow diagram
 
 ```mermaid
 flowchart LR
@@ -98,6 +112,7 @@ All CIDRs and AZs are **hard-coded** in `vpc.tf` and `ec2.tf`; change them there
 | [`vpc.tf`](vpc.tf) | VPC, subnets, IGW, EIP, NAT, route tables, DB subnet group, ALB security group, EC2 security group, ALB, target group, attachments, listener |
 | [`ec2.tf`](ec2.tf) | Two web EC2 instances, AMI, key pair, user data for Apache |
 | [`rds.tf`](rds.tf) | RDS MySQL instance and database security group |
+| [`assets/aws-app-architecture.png`](assets/aws-app-architecture.png) | Reference architecture diagram (used in [Architecture](#architecture)) |
 | [`LICENSE`](LICENSE) | MIT License |
 
 There is **no** `variables.tf` or `outputs.tf` in this repo yet; values such as AMI ID, key name, and DB credentials are set **inline** in the `.tf` files.
